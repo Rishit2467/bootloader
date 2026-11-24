@@ -43,10 +43,12 @@ Tested with `app` firmware (`4,600 bytes`, `CRC32: 0x640CD343`) over `USART2` at
 | **1-Bit Fault Injection (`--corrupt` at `0x08FC`)** | **PASS** — Detected mismatch, returned `NACK (0x15)`, refused boot |
 
 ### Clean Firmware Flash & Live Jump
-![Clean Flash](assets/flash_success.png)
+<img width="1267" height="487" alt="Screenshot 2026-11-24 195535" src="https://github.com/user-attachments/assets/ce0edbe5-7e87-48d8-8622-3c19ed3ecf92" />
+
 
 ### 1-Bit Fault-Injection Test (`--corrupt`)
-![Fault Injection](assets/fault_injection.png)
+<img width="785" height="267" alt="Screenshot 2026-11-24 195306" src="https://github.com/user-attachments/assets/842c3369-a5b7-4b3f-b718-d7455203e407" />
+
 
 ---
 
