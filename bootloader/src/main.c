@@ -18,8 +18,6 @@
 
 UART_HandleTypeDef huart2;
 
-typedef void (*pFunction)(void);
-
 /* ============================================================================
  * 2. HARDWARE INITIALIZATION (HSI 8 MHz default, USART2 @ 115200, LD2 @ PA5)
  * ============================================================================ */
@@ -135,14 +133,13 @@ static uint8_t Is_App_Valid(void) {
 static void Jump_To_App(void) {
     uint32_t app_msp   = *(volatile uint32_t *)APP_START_ADDR;
     uint32_t app_reset = *(volatile uint32_t *)(APP_START_ADDR + 4UL);
-    pFunction app_entry = (pFunction)app_reset;
 
     // 1. Turn off LED and tear down bootloader peripherals
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
     HAL_UART_DeInit(&huart2);
     HAL_DeInit();
 
-    // 2. Disable interrupts and stop SysTick before relocating vector table
+    // 2. Disable interrupts and stop SysTick
     __disable_irq();
     SysTick->CTRL = 0;
     SysTick->LOAD = 0;
@@ -150,11 +147,16 @@ static void Jump_To_App(void) {
 
     // 3. Relocate vector table to application flash base
     SCB->VTOR = APP_START_ADDR;
+    __DSB();
+    __ISB();
 
-    // 4. Load application Main Stack Pointer and branch to Reset_Handler
-    __set_MSP(app_msp);
+    // 4. Switch MSP and branch to Reset_Handler without touching the stack
     __enable_irq();
-    app_entry();
+    __asm volatile (
+        "msr msp, %0 \n"
+        "bx  %1      \n"
+        : : "r" (app_msp), "r" (app_reset) :
+    );
 }
 
 /* ============================================================================
