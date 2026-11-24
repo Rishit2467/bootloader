@@ -1,5 +1,4 @@
 import sys
-import time
 import zlib
 import struct
 import serial
@@ -25,7 +24,7 @@ def flash_firmware(bin_path):
     print(f"Loaded: {bin_path}")
     print(f"Size  : {fw_size} bytes | CRC32: 0x{crc32:08X}")
 
-    ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=0.1)
+    ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=0.25)
     ser.reset_input_buffer()
 
     try:
@@ -34,8 +33,8 @@ def flash_firmware(bin_path):
             ser.write(CMD_SYNC)
             if ser.read(1) == RESP_ACK:
                 print("Bootloader synced!")
+                ser.reset_input_buffer()
                 break
-            time.sleep(0.05)
 
         # 1. Send 8-byte metadata: [size (uint32 LE)][crc32 (uint32 LE)]
         meta = struct.pack("<II", fw_size, crc32)
